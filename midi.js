@@ -12,6 +12,8 @@ const outSelect     = document.getElementById('midi-out-select');
 const logEl         = document.getElementById('midi-log');
 const clearBtn      = document.getElementById('clear-btn');
 const sendBtn       = document.getElementById('send-btn');
+const sendSysex     = document.getElementById('send-sysex');
+const fieldSysex    = document.getElementById('field-sysex');
 const sendType      = document.getElementById('send-type');
 const sendChannel   = document.getElementById('send-channel');
 const sendByte1     = document.getElementById('send-byte1');
@@ -32,7 +34,7 @@ async function initMidi() {
     return;
   }
   try {
-    midiAccess = await navigator.requestMIDIAccess({ sysex: false });
+    midiAccess = await navigator.requestMIDIAccess({ sysex: true });
     setStatus('MIDI connected', true);
     populateDevices();
     midiAccess.onstatechange = onStateChange;
@@ -73,9 +75,10 @@ function populateSelect(selectEl, devices, dir) {
     selectEl.value = prevId;
   }
 
-  // Auto-select first device if nothing is selected
+  // Auto-select Daisy Seed if available, otherwise first device
   if (!selectEl.value) {
-    selectEl.value = devices[0].id;
+    const daisy = devices.find(d => d.name.toLowerCase().includes('daisy'));
+    selectEl.value = (daisy ?? devices[0]).id;
   }
 
   if (dir === 'in')  bindInput(selectEl.value ? midiAccess.inputs.get(selectEl.value)  : null);
@@ -104,6 +107,15 @@ function noteName(n) {
 
 function onMidiMessage(e) {
   const [status, byte1, byte2] = e.data;
+
+  // SysEx
+  if (status === 0xf0) {
+    // strip F0/F7, filter to printable ASCII, trim leading non-text header bytes (e.g. manufacturer ID)
+    const text = [...e.data].filter(b => b >= 0x20 && b <= 0x7e).map(b => String.fromCharCode(b)).join('').replace(/^[^a-zA-Z0-9\[{(]+/, '');
+    addLogEntry('SysEx', 'sysex', text);
+    return;
+  }
+
   const type    = status >> 4;
   const channel = (status & 0x0f) + 1;
   let typeName, dataStr, cssClass;
@@ -190,6 +202,11 @@ function buildMessage() {
     case 'noteoff': return [0x80 | ch, b1, b2];
     case 'cc':      return [0xb0 | ch, b1, b2];
     case 'pc':      return [0xc0 | ch, b1];
+    case 'sysex': {
+      const bytes = sendSysex.value.trim().split(/\s+/).map(s => parseInt(s, 16)).filter(n => !isNaN(n));
+      if (bytes.length < 2 || bytes[0] !== 0xf0 || bytes[bytes.length - 1] !== 0xf7) return null;
+      return bytes;
+    }
     default:        return null;
   }
 }
@@ -199,7 +216,12 @@ function sendMessage() {
   const msg = buildMessage();
   if (!msg) return;
   selectedOutput.send(msg);
-  onMidiMessage({ data: msg });
+  if (sendType.value === 'sysex') {
+    const hex = msg.map(b => b.toString(16).padStart(2, '0')).join(' ');
+    addLogEntry('SysEx', 'sysex', hex);
+  } else {
+    onMidiMessage({ data: msg });
+  }
 }
 
 function updateButtons() {
@@ -211,9 +233,12 @@ function updateButtons() {
 
 // --- Send type UI ---
 sendType.addEventListener('change', () => {
-  const isPc = sendType.value === 'pc';
-  const isCC = sendType.value === 'cc';
-  fieldByte2.style.display = isPc ? 'none' : '';
+  const isPc     = sendType.value === 'pc';
+  const isCC     = sendType.value === 'cc';
+  const isSysex  = sendType.value === 'sysex';
+  fieldByte2.style.display  = (isPc || isSysex) ? 'none' : '';
+  document.getElementById('field-byte1').style.display = isSysex ? 'none' : '';
+  document.getElementById('field-sysex').style.display = isSysex ? '' : 'none';
   document.querySelector('label[for="send-byte1"]').textContent =
     isCC ? 'CC Number' : isPc ? 'Program' : 'Note';
   document.querySelector('label[for="send-byte2"]').textContent =
@@ -360,9 +385,9 @@ document.addEventListener('keyup', e => {
 });
 
 // --- Note on/off (polyphonic) ---
-function noteOn(note, source) {
+function noteOn(note, _source) {
   if (activeNotes.has(note)) return;
-  activeNotes.set(note, source);
+  activeNotes.set(note, _source);
   highlightKey(note, true);
   if (!selectedOutput) return;
   const ch = getChannel();
@@ -370,7 +395,7 @@ function noteOn(note, source) {
   addLogEntry('Note On', 'noteon', `ch${ch + 1}  ${noteName(note)} (${note})  vel 100`);
 }
 
-function noteOff(note, source) {
+function noteOff(note, _source) {
   if (!activeNotes.has(note)) return;
   activeNotes.delete(note);
   highlightKey(note, false);

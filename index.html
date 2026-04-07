@@ -71,6 +71,7 @@
             <option value="noteoff">Note Off</option>
             <option value="cc">Control Change</option>
             <option value="pc">Program Change</option>
+            <option value="sysex">SysEx</option>
           </select>
         </div>
         <div class="field-group">
@@ -84,6 +85,10 @@
         <div class="field-group" id="field-byte2">
           <label for="send-byte2">Velocity / Value</label>
           <input id="send-byte2" type="number" min="0" max="127" value="100">
+        </div>
+        <div class="field-group" id="field-sysex" style="display:none">
+          <label for="send-sysex">Hex bytes</label>
+          <input id="send-sysex" type="text" placeholder="F0 41 10 00 F7" spellcheck="false">
         </div>
         <button id="send-btn" disabled>Send</button>
       </div>

@@ -390,7 +390,10 @@ select[disabled] {
   border: 1px solid var(--border);
   border-radius: 6px;
   height: 120px;
+  min-height: 60px;
+  max-height: 600px;
   overflow-y: auto;
+  resize: vertical;
   padding: 6px 8px;
   display: flex;
   flex-direction: column-reverse;
@@ -431,6 +434,7 @@ select[disabled] {
 .log-type.cc      { color: var(--accent); }
 .log-type.pc      { color: var(--yellow); }
 .log-type.other   { color: var(--text-dim); }
+.log-type.sysex   { color: var(--yellow); }
 .log-data  { color: var(--text); opacity: 0.8; }
 
 /* Scrollbar (log) */
