@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web MIDI Controller</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Web MIDI Controller</h1>
+      <div id="midi-status" class="status disconnected">MIDI not connected</div>
+    </header>
+
+    <section class="device-panel">
+      <div class="device-group">
+        <label for="midi-in-select">MIDI Input</label>
+        <select id="midi-in-select" disabled>
+          <option value="">-- No devices --</option>
+        </select>
+      </div>
+      <div class="device-group">
+        <label for="midi-out-select">MIDI Output</label>
+        <select id="midi-out-select" disabled>
+          <option value="">-- No devices --</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="piano-panel">
+      <div class="piano-header">
+        <div class="octave-controls">
+          <h2>Piano</h2>
+          <button id="oct-down-btn">&#9664; Oct</button>
+          <span id="piano-range-label" class="piano-range">C3 – B5</span>
+          <button id="oct-up-btn">Oct &#9654;</button>
+        </div>
+        <div class="pc-controls">
+          <span class="pc-title">Program</span>
+          <button id="pc-prev-btn" disabled>&#9664;</button>
+          <div class="pc-display">
+            <span id="pc-label">1</span>
+            <span id="pc-name">Virtual Analog VCF</span>
+          </div>
+          <button id="pc-next-btn" disabled>&#9654;</button>
+        </div>
+      </div>
+      <div class="piano-wrap">
+        <div id="piano" class="piano"></div>
+      </div>
+    </section>
+
+    <section class="monitor-panel">
+      <div class="monitor-header">
+        <h2>MIDI Monitor</h2>
+        <button id="clear-btn">Clear</button>
+      </div>
+      <div id="midi-log" class="midi-log">
+        <p class="placeholder">Waiting for MIDI messages...</p>
+      </div>
+    </section>
+
+    <section class="send-panel">
+      <h2>Send MIDI</h2>
+      <div class="send-controls">
+        <div class="field-group">
+          <label for="send-type">Type</label>
+          <select id="send-type">
+            <option value="noteon">Note On</option>
+            <option value="noteoff">Note Off</option>
+            <option value="cc">Control Change</option>
+            <option value="pc">Program Change</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="send-channel">Channel</label>
+          <input id="send-channel" type="number" min="1" max="16" value="1">
+        </div>
+        <div class="field-group" id="field-byte1">
+          <label for="send-byte1">Note / CC#</label>
+          <input id="send-byte1" type="number" min="0" max="127" value="60">
+        </div>
+        <div class="field-group" id="field-byte2">
+          <label for="send-byte2">Velocity / Value</label>
+          <input id="send-byte2" type="number" min="0" max="127" value="100">
+        </div>
+        <button id="send-btn" disabled>Send</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="midi.js"></script>
+</body>
+</html>
