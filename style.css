@@ -137,6 +137,19 @@ h2 {
   cursor: not-allowed;
 }
 
+.thru-group {
+  flex: 0;
+  min-width: unset;
+  gap: 8px;
+}
+
+#thru-toggle {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
 /* ── General form inputs (send panel) ── */
 label {
   font-size: 12px;

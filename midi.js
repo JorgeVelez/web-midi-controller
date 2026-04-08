@@ -4,12 +4,14 @@
 let midiAccess     = null;
 let selectedInput  = null;
 let selectedOutput = null;
+let midiThru       = true;
 
 // --- DOM refs ---
 const statusEl      = document.getElementById('midi-status');
 const inSelect      = document.getElementById('midi-in-select');
 const outSelect     = document.getElementById('midi-out-select');
 const logEl         = document.getElementById('midi-log');
+const thruToggle    = document.getElementById('thru-toggle');
 const clearBtn      = document.getElementById('clear-btn');
 const sendBtn       = document.getElementById('send-btn');
 const sendSysex     = document.getElementById('send-sysex');
@@ -109,6 +111,8 @@ function onMidiMessage(e) {
   const [status, byte1, byte2] = e.data;
 
   // SysEx
+  if (midiThru && selectedOutput) selectedOutput.send(e.data);
+
   if (status === 0xf0) {
     // strip F0/F7, filter to printable ASCII, trim leading non-text header bytes (e.g. manufacturer ID)
     const text = [...e.data].filter(b => b >= 0x20 && b <= 0x7e).map(b => String.fromCharCode(b)).join('').replace(/^[^a-zA-Z0-9\[{(]+/, '');
@@ -485,6 +489,10 @@ outSelect.addEventListener('change', () => {
   selectedOutput = outSelect.value ? midiAccess.outputs.get(outSelect.value) : null;
   updateButtons();
   outSelect.blur();
+});
+
+thruToggle.addEventListener('change', () => {
+  midiThru = thruToggle.checked;
 });
 
 clearBtn.addEventListener('click', () => {
