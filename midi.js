@@ -633,7 +633,7 @@ function noteOn(note, _source) {
   activeNotes.set(note, _source);
   highlightKey(note, true);
   if (!selectedOutput) return;
-  const ch = getChannel();
+  const ch = soundChannel;
   const midiNote = Math.max(0, Math.min(127, note + transposeAmount));
   selectedOutput.send([0x90 | ch, midiNote, 100]);
   addLogEntry('Note On', 'noteon', `ch${ch + 1}  ${noteName(midiNote)} (${midiNote})  vel 100`);
@@ -644,7 +644,7 @@ function noteOff(note, _source) {
   activeNotes.delete(note);
   highlightKey(note, false);
   if (!selectedOutput) return;
-  const ch = getChannel();
+  const ch = soundChannel;
   const midiNote = Math.max(0, Math.min(127, note + transposeAmount));
   selectedOutput.send([0x80 | ch, midiNote, 0]);
   addLogEntry('Note Off', 'noteoff', `ch${ch + 1}  ${noteName(midiNote)} (${midiNote})  vel 0`);
