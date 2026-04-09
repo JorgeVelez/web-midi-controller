@@ -224,17 +224,17 @@ const KNOB_GROUPS = [
   {
     container: 'ctrl-rhythm-1',
     knobs: [
-      { id: 'x1',     label: 'X',     cc: 80, value: 64 },
-      { id: 'y1',     label: 'Y',     cc: 81, value: 64 },
-      { id: 'chaos1', label: 'Chaos', cc: 82, value: 0  },
+      { id: 'x1',     label: 'X',     cc: 32, value: 64 },
+      { id: 'y1',     label: 'Y',     cc: 34, value: 64 },
+      { id: 'chaos1', label: 'Chaos', cc: 36, value: 0  },
     ],
   },
   {
     container: 'ctrl-rhythm-2',
     knobs: [
-      { id: 'x2',     label: 'X',     cc: 83, value: 64 },
-      { id: 'y2',     label: 'Y',     cc: 84, value: 64 },
-      { id: 'chaos2', label: 'Chaos', cc: 85, value: 0  },
+      { id: 'x2',     label: 'X',     cc: 33, value: 64 },
+      { id: 'y2',     label: 'Y',     cc: 35, value: 64 },
+      { id: 'chaos2', label: 'Chaos', cc: 37, value: 0  },
     ],
   },
   {
@@ -257,14 +257,17 @@ const KNOB_GROUPS = [
   },
 ];
 
-const SOUND_GROUP_CONTAINER = 'ctrl-sound';
+const SOUND_GROUP_CONTAINER  = 'ctrl-sound';
+const RHYTHM_CONTAINERS      = ['ctrl-rhythm-1', 'ctrl-rhythm-2'];
+let rhythmChannel = 1; // 1–6, raw MIDI nibble
 
 function buildKnobs() {
   allKnobs = [];
   for (const group of KNOB_GROUPS) {
     const container = document.getElementById(group.container);
     if (!container) continue;
-    const isSoundGroup = group.container === SOUND_GROUP_CONTAINER;
+    const isSoundGroup  = group.container === SOUND_GROUP_CONTAINER;
+    const isRhythmGroup = RHYTHM_CONTAINERS.includes(group.container);
     for (const def of group.knobs) {
       const knob = new Knob(def);
       knob.onChange = (value, cc, channel) => {
@@ -273,7 +276,7 @@ function buildKnobs() {
           return;
         }
         if (!selectedOutput) return;
-        const ch = isSoundGroup ? soundChannel : (channel - 1);
+        const ch = isSoundGroup ? soundChannel : isRhythmGroup ? rhythmChannel : (channel - 1);
         selectedOutput.send([0xb0 | ch, cc, value]);
         addLogEntry('CC', 'cc', `ch${ch}  cc${cc}  val ${value}`);
       };
@@ -710,13 +713,15 @@ function saveState() {
     knobState[k.id] = { value: k.value, cc: k.cc, channel: k.channel };
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    thru:        thruToggle.checked,
-    program:     currentProgram,
-    octave:      pianoStartNote,
-    channel:     sendChannel.value,
-    knobs:       knobState,
+    thru:         thruToggle.checked,
+    program:      currentProgram,
+    octave:       pianoStartNote,
+    channel:      sendChannel.value,
+    knobs:        knobState,
     preferredIn:  inSelect.value,
     preferredOut: outSelect.value,
+    soundPresets:  soundPresets,
+    rhythmPresets: rhythmPresets,
   }));
 }
 
@@ -753,6 +758,22 @@ function loadState() {
         }
       }
     }
+    if (state.rhythmPresets) {
+      state.rhythmPresets.forEach((p, i) => {
+        if (rhythmPresets[i]) Object.assign(rhythmPresets[i], p);
+      });
+      loadRhythmPreset(currentRhythmEngine - 1);
+    }
+
+    if (state.soundPresets) {
+      state.soundPresets.forEach((p, i) => {
+        if (soundPresets[i] && p.rhythmEngine !== undefined) {
+          soundPresets[i].rhythmEngine = p.rhythmEngine;
+        }
+      });
+      const engine = soundPresets[currentPreset].rhythmEngine ?? 0;
+      document.querySelectorAll('.rhythm-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.rhythm) === engine));
+    }
   } catch (err) {
     console.warn('loadState failed, clearing saved state:', err);
     localStorage.removeItem(STORAGE_KEY);
@@ -763,20 +784,28 @@ function loadState() {
 const SOUND_KNOB_IDS = ['harmonics','timbre','morph','lpg_colour','decay','pitch_offset'];
 let currentPreset = 0;
 let soundChannel  = 1; // 1–6 for buttons, 0 for All (raw MIDI nibble)
-// presets[slot][knobId] = value
-const soundPresets = Array.from({ length: 6 }, () => ({}));
+// presets[slot][knobId] = value, plus rhythmEngine
+const soundPresets = Array.from({ length: 6 }, () => ({ rhythmEngine: 0 }));
 
 function savePreset(slot) {
   for (const id of SOUND_KNOB_IDS) {
     const k = allKnobs.find(k => k.id === id);
     if (k) soundPresets[slot][id] = k.value;
   }
+  const active = document.querySelector('.rhythm-btn.active');
+  if (active) soundPresets[slot].rhythmEngine = parseInt(active.dataset.rhythm);
 }
 
 function loadPreset(slot) {
   for (const id of SOUND_KNOB_IDS) {
     const k = allKnobs.find(k => k.id === id);
     if (k && soundPresets[slot][id] !== undefined) k.setValue(soundPresets[slot][id]);
+  }
+  const engine = soundPresets[slot].rhythmEngine ?? 0;
+  document.querySelectorAll('.rhythm-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.rhythm) === engine));
+  if (selectedOutput) {
+    selectedOutput.send([0xb0 | soundChannel, 31, engine]);
+    addLogEntry('CC', 'cc', `ch${soundChannel}  cc31  val ${engine} (rhythm assign)`);
   }
 }
 
@@ -800,21 +829,55 @@ document.querySelectorAll('.preset-btn').forEach(btn => {
   });
 });
 
-// --- Play buttons ---
-document.querySelectorAll('.play-btn').forEach(btn => {
+// --- Rhythm presets ---
+const RHYTHM_KNOB_IDS = ['x1','y1','chaos1','x2','y2','chaos2'];
+let currentRhythmEngine = 1; // 1–6
+const rhythmPresets = Array.from({ length: 6 }, () => ({}));
+
+function saveRhythmPreset(slot) {
+  for (const id of RHYTHM_KNOB_IDS) {
+    const k = allKnobs.find(k => k.id === id);
+    if (k) rhythmPresets[slot][id] = k.value;
+  }
+}
+
+function loadRhythmPreset(slot) {
+  for (const id of RHYTHM_KNOB_IDS) {
+    const k = allKnobs.find(k => k.id === id);
+    if (k && rhythmPresets[slot][id] !== undefined) k.setValue(rhythmPresets[slot][id]);
+  }
+}
+
+// --- Rhythm engine selector ---
+document.querySelectorAll('.rhythm-sel-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    if (!selectedOutput) return;
-    if (btn.dataset.play === 'all') {
-      for (let ch = 0; ch < 6; ch++) {
-        selectedOutput.send([0xb0 | (ch + 1), 30, 127]);
-      }
-      addLogEntry('CC', 'cc', `ch1-6  cc30  val 127 (play all)`);
-    } else {
-      const ch = parseInt(btn.dataset.play);
-      selectedOutput.send([0xb0 | ch, 30, 127]);
-      addLogEntry('CC', 'cc', `ch${ch}  cc30  val 127 (play)`);
-    }
+    saveRhythmPreset(currentRhythmEngine - 1);
+    currentRhythmEngine = parseInt(btn.dataset.engine);
+    rhythmChannel = currentRhythmEngine;
+    loadRhythmPreset(currentRhythmEngine - 1);
+    document.querySelectorAll('.rhythm-sel-btn').forEach(b => b.classList.toggle('active', b === btn));
+    saveState();
   });
+});
+
+// --- Rhythm assign buttons ---
+document.querySelectorAll('.rhythm-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const value = parseInt(btn.dataset.rhythm);
+    document.querySelectorAll('.rhythm-btn').forEach(b => b.classList.toggle('active', b === btn));
+    soundPresets[currentPreset].rhythmEngine = value;
+    if (!selectedOutput) return;
+    selectedOutput.send([0xb0 | soundChannel, 31, value]);
+    addLogEntry('CC', 'cc', `ch${soundChannel}  cc31  val ${value} (rhythm assign)`);
+    saveState();
+  });
+});
+
+// --- Play button ---
+document.getElementById('rhythm-play-btn').addEventListener('click', () => {
+  if (!selectedOutput) return;
+  selectedOutput.send([0xb0 | rhythmChannel, 30, 127]);
+  addLogEntry('CC', 'cc', `ch${rhythmChannel}  cc30  val 127 (play)`);
 });
 
 // --- Boot ---
