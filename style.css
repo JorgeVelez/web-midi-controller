@@ -706,6 +706,52 @@ select[disabled] {
 }
 
 /* ── Send panel — discrete bar ── */
+.config-panel {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.config-panel h2 {
+  margin: 0;
+}
+
+.play-btns {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.play-btn {
+  height: 22px;
+  padding: 0 6px;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--surface2);
+  color: var(--green);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.play-btn:hover:not([disabled]) {
+  background: var(--border);
+  color: var(--text);
+}
+
+.play-btn--all {
+  opacity: 0.6;
+}
+
+.play-btn--all:hover:not([disabled]) {
+  opacity: 1;
+}
+
 .send-panel {
   background: transparent;
   border: 1px solid var(--border);

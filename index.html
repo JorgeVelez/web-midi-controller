@@ -62,6 +62,15 @@
       </div>
       <div class="ctrl-group">
         <h2>Rhythm</h2>
+        <div class="play-btns">
+          <button class="play-btn" data-play="1">&#9654; 1</button>
+          <button class="play-btn" data-play="2">&#9654; 2</button>
+          <button class="play-btn" data-play="3">&#9654; 3</button>
+          <button class="play-btn" data-play="4">&#9654; 4</button>
+          <button class="play-btn" data-play="5">&#9654; 5</button>
+          <button class="play-btn" data-play="6">&#9654; 6</button>
+          <button class="play-btn play-btn--all" data-play="all">&#9654; all</button>
+        </div>
         <div class="ctrl-rhythm-sets">
           <div class="ctrl-rhythm-set">
             <span class="ctrl-set-num">1</span>
@@ -96,12 +105,16 @@
     <section class="monitor-panel">
       <div class="monitor-header">
         <h2>MIDI Monitor</h2>
-        <button id="reset-state-btn">Reset Saved</button>
         <button id="clear-btn">Clear</button>
       </div>
       <div id="midi-log" class="midi-log">
         <p class="placeholder">Waiting for MIDI messages...</p>
       </div>
+    </section>
+
+    <section class="config-panel">
+      <h2>Configuration</h2>
+      <button id="reset-state-btn">Reset Saved</button>
     </section>
 
     <section class="send-panel">

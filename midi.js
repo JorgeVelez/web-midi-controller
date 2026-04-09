@@ -794,6 +794,23 @@ document.querySelectorAll('.preset-btn').forEach(btn => {
   });
 });
 
+// --- Play buttons ---
+document.querySelectorAll('.play-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (!selectedOutput) return;
+    if (btn.dataset.play === 'all') {
+      for (let ch = 0; ch < 6; ch++) {
+        selectedOutput.send([0xb0 | (ch + 1), 30, 127]);
+      }
+      addLogEntry('CC', 'cc', `ch1-6  cc30  val 127 (play all)`);
+    } else {
+      const ch = parseInt(btn.dataset.play);
+      selectedOutput.send([0xb0 | ch, 30, 127]);
+      addLogEntry('CC', 'cc', `ch${ch}  cc30  val 127 (play)`);
+    }
+  });
+});
+
 // --- Boot ---
 try {
   buildKnobs();
