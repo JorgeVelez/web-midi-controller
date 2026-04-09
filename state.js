@@ -20,7 +20,6 @@ export function saveState() {
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     thru:          refs.thruToggle.checked,
-    program:       refs.getCurrentProgram(),
     octave:        refs.getPianoStartNote(),
     channel:       refs.sendChannel.value,
     knobs:         knobState,

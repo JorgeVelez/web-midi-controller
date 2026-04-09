@@ -43,7 +43,7 @@ pcNextBtn.addEventListener('click', () => { sendProgramChange(currentProgram + 1
 const SOUND_KNOB_IDS = ['harmonics','timbre','morph','lpg_colour','decay','pitch_offset'];
 export let soundChannel  = 1;
 let currentPreset = 0;
-export const soundPresets = Array.from({ length: 6 }, () => ({ rhythmEngine: 0 }));
+export const soundPresets = Array.from({ length: 6 }, () => ({ rhythmEngine: 0, program: 0 }));
 
 let _allKnobs = null;
 export function setAllKnobs(knobs) { _allKnobs = knobs; }
@@ -55,6 +55,7 @@ function savePreset(slot) {
   }
   const active = document.querySelector('.rhythm-btn.active');
   if (active) soundPresets[slot].rhythmEngine = parseInt(active.dataset.rhythm);
+  soundPresets[slot].program = currentProgram;
 }
 
 function loadPreset(slot) {
@@ -67,6 +68,13 @@ function loadPreset(slot) {
   if (selectedOutput) {
     selectedOutput.send([0xb0 | soundChannel, 31, engine]);
     addLogEntry('CC', 'cc', `ch${soundChannel}  cc31  val ${engine} (rhythm assign)`);
+  }
+  const prog = soundPresets[slot].program ?? 0;
+  currentProgram = prog;
+  updatePcLabel();
+  if (selectedOutput) {
+    selectedOutput.send([0xc0 | soundChannel, prog]);
+    addLogEntry('Prog Chg', 'pc', `ch${soundChannel + 1}  prog ${prog}`);
   }
 }
 
@@ -107,11 +115,12 @@ document.querySelectorAll('.rhythm-btn').forEach(btn => {
 export function loadSoundState(state) {
   if (!state.soundPresets) return;
   state.soundPresets.forEach((p, i) => {
-    if (soundPresets[i] && p.rhythmEngine !== undefined) {
-      soundPresets[i].rhythmEngine = p.rhythmEngine;
-    }
+    if (!soundPresets[i]) return;
+    if (p.rhythmEngine !== undefined) soundPresets[i].rhythmEngine = p.rhythmEngine;
+    if (p.program      !== undefined) soundPresets[i].program      = p.program;
   });
   const engine = soundPresets[currentPreset].rhythmEngine ?? 0;
   document.querySelectorAll('.rhythm-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.rhythm) === engine));
-  if (state.program !== undefined) { currentProgram = state.program; updatePcLabel(); }
+  currentProgram = soundPresets[currentPreset].program ?? 0;
+  updatePcLabel();
 }
