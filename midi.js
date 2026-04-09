@@ -238,6 +238,12 @@ const KNOB_GROUPS = [
     ],
   },
   {
+    container: 'ctrl-global',
+    knobs: [
+      { id: 'bpm', label: 'BPM', cc: 70, value: 64 },
+    ],
+  },
+  {
     container: 'ctrl-pitch',
     knobs: [
       { id: 'root',      label: 'Root',      cc: 86, value: 0,  },
