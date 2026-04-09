@@ -15,6 +15,7 @@ const outSelect     = document.getElementById('midi-out-select');
 const logEl         = document.getElementById('midi-log');
 const thruToggle    = document.getElementById('thru-toggle');
 const clearBtn      = document.getElementById('clear-btn');
+const resetStateBtn = document.getElementById('reset-state-btn');
 const sendBtn       = document.getElementById('send-btn');
 const sendSysex     = document.getElementById('send-sysex');
 const sendType      = document.getElementById('send-type');
@@ -212,12 +213,12 @@ const KNOB_GROUPS = [
   {
     container: 'ctrl-sound',
     knobs: [
-      { id: 'freq',      label: 'Freq',      cc: 74, value: 64 },
-      { id: 'harmonics', label: 'Harmonics', cc: 71, value: 0  },
-      { id: 'timbre',    label: 'Timbre',    cc: 73, value: 64 },
-      { id: 'morph',     label: 'Morph',     cc: 76, value: 0  },
-      { id: 'lpg',       label: 'LPG',       cc: 75, value: 64 },
-      { id: 'decay',     label: 'Decay',     cc: 72, value: 64 },
+      { id: 'harmonics',    label: 'Harmonics',    cc: 10, value: 0  },
+      { id: 'timbre',       label: 'Timbre',       cc: 11, value: 64 },
+      { id: 'morph',        label: 'Morph',        cc: 12, value: 0  },
+      { id: 'lpg_colour',   label: 'LPG Colour',   cc: 13, value: 64 },
+      { id: 'decay',        label: 'Decay',        cc: 14, value: 64 },
+      { id: 'pitch_offset', label: 'Freq',          cc: 15, value: 64 },
     ],
   },
   {
@@ -673,9 +674,8 @@ function sendProgramChange(prog) {
   currentProgram = Math.max(0, Math.min(127, prog));
   updatePcLabel();
   if (!selectedOutput) return;
-  const ch = getChannel();
-  selectedOutput.send([0xc0 | ch, currentProgram]);
-  addLogEntry('Prog Chg', 'pc', `ch${ch + 1}  prog ${currentProgram}`);
+  selectedOutput.send([0xc0 | soundChannel, currentProgram]);
+  addLogEntry('Prog Chg', 'pc', `ch${soundChannel + 1}  prog ${currentProgram}`);
 }
 
 pcPrevBtn.addEventListener('click', () => sendProgramChange(currentProgram - 1));
@@ -686,6 +686,7 @@ inSelect.addEventListener('change', () => { bindInput(inSelect.value ? midiAcces
 outSelect.addEventListener('change', () => { selectedOutput = outSelect.value ? midiAccess.outputs.get(outSelect.value) : null; updateButtons(); outSelect.blur(); saveState(); });
 thruToggle.addEventListener('change', () => { midiThru = thruToggle.checked; saveState(); });
 clearBtn.addEventListener('click', () => { logEl.innerHTML = '<p class="placeholder">Waiting for MIDI messages...</p>'; });
+resetStateBtn.addEventListener('click', () => { localStorage.removeItem(STORAGE_KEY); location.reload(); });
 sendBtn.addEventListener('click', sendMessage);
 [sendChannel, sendByte1, sendByte2].forEach(el => { el.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); }); });
 pcPrevBtn.addEventListener('click', saveState);
@@ -753,7 +754,7 @@ function loadState() {
 }
 
 // --- Sound presets ---
-const SOUND_KNOB_IDS = ['freq','harmonics','timbre','morph','lpg','decay'];
+const SOUND_KNOB_IDS = ['harmonics','timbre','morph','lpg_colour','decay','pitch_offset'];
 let currentPreset = 0;
 let soundChannel  = 1; // 1–6 for buttons, 0 for All (raw MIDI nibble)
 // presets[slot][knobId] = value
