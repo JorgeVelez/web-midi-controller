@@ -32,6 +32,53 @@
       </div>
     </section>
 
+    <section class="controls-panel">
+      <div class="ctrl-group">
+        <h2>Sound</h2>
+        <div class="sound-inner">
+          <div class="sound-presets">
+            <span class="sound-presets-label">Voices</span>
+            <button class="preset-btn active" data-preset="0">1</button>
+            <button class="preset-btn" data-preset="1">2</button>
+            <button class="preset-btn" data-preset="2">3</button>
+            <button class="preset-btn" data-preset="3">4</button>
+            <button class="preset-btn" data-preset="4">5</button>
+            <button class="preset-btn" data-preset="5">6</button>
+            <button class="preset-btn preset-btn--all" data-preset="all">all</button>
+          </div>
+          <div class="sound-right">
+            <div class="pc-controls">
+              <span class="pc-title">Program</span>
+              <button id="pc-prev-btn" disabled>&#9664;</button>
+              <div class="pc-display">
+                <span id="pc-label">1</span>
+                <span id="pc-name">Virtual Analog VCF</span>
+              </div>
+              <button id="pc-next-btn" disabled>&#9654;</button>
+            </div>
+            <div class="knob-grid" id="ctrl-sound"></div>
+          </div>
+        </div>
+      </div>
+      <div class="ctrl-group">
+        <h2>Rhythm</h2>
+        <div class="ctrl-rhythm-sets">
+          <div class="ctrl-rhythm-set">
+            <span class="ctrl-set-num">1</span>
+            <div class="knob-grid" id="ctrl-rhythm-1"></div>
+          </div>
+          <div class="ctrl-rhythm-set">
+            <span class="ctrl-set-num">2</span>
+            <div class="knob-grid" id="ctrl-rhythm-2"></div>
+          </div>
+        </div>
+      </div>
+      <div class="ctrl-group">
+        <h2>Pitch</h2>
+        <div class="knob-grid" id="ctrl-pitch"></div>
+      </div>
+    </section>
+
     <section class="piano-panel">
       <div class="piano-header">
         <div class="octave-controls">
@@ -39,15 +86,6 @@
           <button id="oct-down-btn">&#9664; Oct</button>
           <span id="piano-range-label" class="piano-range">C3 – B5</span>
           <button id="oct-up-btn">Oct &#9654;</button>
-        </div>
-        <div class="pc-controls">
-          <span class="pc-title">Program</span>
-          <button id="pc-prev-btn" disabled>&#9664;</button>
-          <div class="pc-display">
-            <span id="pc-label">1</span>
-            <span id="pc-name">Virtual Analog VCF</span>
-          </div>
-          <button id="pc-next-btn" disabled>&#9654;</button>
         </div>
       </div>
       <div class="piano-wrap">
@@ -66,32 +104,31 @@
     </section>
 
     <section class="send-panel">
-      <h2>Send MIDI</h2>
       <div class="send-controls">
-        <div class="field-group">
+        <div class="send-field">
           <label for="send-type">Type</label>
           <select id="send-type">
             <option value="noteon">Note On</option>
             <option value="noteoff">Note Off</option>
-            <option value="cc">Control Change</option>
-            <option value="pc">Program Change</option>
+            <option value="cc">CC</option>
+            <option value="pc">Prog Chg</option>
             <option value="sysex">SysEx</option>
           </select>
         </div>
-        <div class="field-group">
-          <label for="send-channel">Channel</label>
+        <div class="send-field">
+          <label for="send-channel">Ch</label>
           <input id="send-channel" type="number" min="1" max="16" value="1">
         </div>
-        <div class="field-group" id="field-byte1">
+        <div class="send-field" id="field-byte1">
           <label for="send-byte1">Note / CC#</label>
           <input id="send-byte1" type="number" min="0" max="127" value="60">
         </div>
-        <div class="field-group" id="field-byte2">
-          <label for="send-byte2">Velocity / Value</label>
+        <div class="send-field" id="field-byte2">
+          <label for="send-byte2">Val / Vel</label>
           <input id="send-byte2" type="number" min="0" max="127" value="100">
         </div>
-        <div class="field-group" id="field-sysex" style="display:none">
-          <label for="send-sysex">Hex bytes</label>
+        <div class="send-field" id="field-sysex" style="display:none">
+          <label for="send-sysex">Hex</label>
           <input id="send-sysex" type="text" placeholder="F0 41 10 00 F7" spellcheck="false">
         </div>
         <button id="send-btn" disabled>Send</button>
