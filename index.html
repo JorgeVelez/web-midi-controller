@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Web MIDI Controller</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
 <body>
   <div class="app">
@@ -57,20 +58,19 @@
               <button id="pc-next-btn" disabled>&#9654;</button>
             </div>
             <div class="knob-grid" id="ctrl-sound"></div>
-            <div class="rhythm-assign">
-              <span class="rhythm-assign-label">Rhythm</span>
-              <button class="rhythm-btn active" data-rhythm="0">1</button>
-              <button class="rhythm-btn" data-rhythm="1">2</button>
-              <button class="rhythm-btn" data-rhythm="2">3</button>
-              <button class="rhythm-btn" data-rhythm="3">4</button>
-              <button class="rhythm-btn" data-rhythm="4">5</button>
-              <button class="rhythm-btn" data-rhythm="5">6</button>
-            </div>
           </div>
         </div>
       </div>
       <div class="ctrl-group">
-        <h2>Rhythm</h2>
+        <div class="rhythm-header">
+          <h2>Rhythm</h2>
+        </div>
+        <button id="rhythm-play-btn" class="play-btn rhythm-play-btn">&#9654;</button>
+        <div class="output-indicators">
+          <button class="output-btn" data-output="1"></button>
+          <button class="output-btn" data-output="2"></button>
+          <button class="output-btn" data-output="3"></button>
+        </div>
         <div class="rhythm-select">
           <span class="rhythm-select-label">Engine</span>
           <button class="rhythm-sel-btn active" data-engine="1">1</button>
@@ -80,14 +80,11 @@
           <button class="rhythm-sel-btn" data-engine="5">5</button>
           <button class="rhythm-sel-btn" data-engine="6">6</button>
         </div>
-        <button id="rhythm-play-btn" class="play-btn">&#9654;</button>
         <div class="ctrl-rhythm-sets">
           <div class="ctrl-rhythm-set">
-            <span class="ctrl-set-num">1</span>
             <div class="knob-grid" id="ctrl-rhythm-1"></div>
           </div>
           <div class="ctrl-rhythm-set">
-            <span class="ctrl-set-num">2</span>
             <div class="knob-grid" id="ctrl-rhythm-2"></div>
           </div>
         </div>

@@ -44,9 +44,9 @@ const KNOB_GROUPS = [
   {
     container: 'ctrl-rhythm-2',
     knobs: [
-      { id: 'x2',     label: 'X',     cc: 33, value: 64 },
-      { id: 'y2',     label: 'Y',     cc: 35, value: 64 },
-      { id: 'chaos2', label: 'Chaos', cc: 37, value: 0  },
+      { id: 'density1', label: 'Density 1', cc: 33, value: 64 },
+      { id: 'density2', label: 'Density 2', cc: 35, value: 64 },
+      { id: 'density3', label: 'Density 3', cc: 37, value: 0  },
     ],
   },
   {
@@ -91,7 +91,7 @@ function buildKnobs() {
         if (!selectedOutput) return;
         const ch = isSoundGroup ? soundChannel : isRhythmGroup ? rhythmChannel : (channel - 1);
         selectedOutput.send([0xb0 | ch, cc, value]);
-        addLogEntry('CC', 'cc', `ch${ch}  cc${cc}  val ${value}`);
+        addLogEntry('CC', 'cc', `ch${ch + 1}  cc${cc}  val ${value}`);
       };
       container.appendChild(knob.el);
       allKnobs.push(knob);

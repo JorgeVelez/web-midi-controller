@@ -65,10 +65,6 @@ function loadPreset(slot) {
   }
   const engine = soundPresets[slot].rhythmEngine ?? 0;
   document.querySelectorAll('.rhythm-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.rhythm) === engine));
-  if (selectedOutput) {
-    selectedOutput.send([0xb0 | soundChannel, 31, engine]);
-    addLogEntry('CC', 'cc', `ch${soundChannel}  cc31  val ${engine} (rhythm assign)`);
-  }
   const prog = soundPresets[slot].program ?? 0;
   currentProgram = prog;
   updatePcLabel();

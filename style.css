@@ -469,6 +469,7 @@ select[disabled] {
 
 .ctrl-group {
   flex: 1;
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -502,6 +503,53 @@ select[disabled] {
   align-items: center;
   gap: 3px;
   flex-shrink: 0;
+}
+
+.rhythm-play-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.output-indicators {
+  position: absolute;
+  top: 38px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.output-btn {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  cursor: pointer;
+  padding: 0;
+}
+
+.output-btn:hover {
+  background: var(--border);
+}
+
+.output-btn.active {
+  background: var(--green);
+  border-color: var(--green);
+  box-shadow: 0 0 4px var(--green);
+}
+
+.rhythm-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.rhythm-header h2 {
+  margin: 0;
 }
 
 .rhythm-select {
@@ -816,6 +864,9 @@ select[disabled] {
   border-radius: 4px;
   cursor: pointer;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .play-btn:hover:not([disabled]) {

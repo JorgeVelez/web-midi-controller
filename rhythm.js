@@ -1,10 +1,11 @@
 import { saveState } from './state.js';
 import { selectedOutput, addLogEntry } from './devices.js';
+import { soundChannel } from './sound.js';
 
 export let rhythmChannel = 1;
 
 // --- Rhythm presets ---
-const RHYTHM_KNOB_IDS = ['x1','y1','chaos1','x2','y2','chaos2'];
+const RHYTHM_KNOB_IDS = ['x1','y1','chaos1','density1','density2','density3'];
 let currentRhythmEngine = 1;
 export const rhythmPresets = Array.from({ length: 6 }, () => ({}));
 
@@ -34,6 +35,17 @@ document.querySelectorAll('.rhythm-sel-btn').forEach(btn => {
     loadRhythmPreset(currentRhythmEngine - 1);
     document.querySelectorAll('.rhythm-sel-btn').forEach(b => b.classList.toggle('active', b === btn));
     saveState();
+  });
+});
+
+// --- Output selector ---
+document.querySelectorAll('.output-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const output = parseInt(btn.dataset.output);
+    const value  = (currentRhythmEngine - 1) * 3 + (output - 1);
+    if (!selectedOutput) return;
+    selectedOutput.send([0xb0 | soundChannel, 31, value]);
+    addLogEntry('CC', 'cc', `ch${soundChannel}  cc31  val ${value} (engine ${currentRhythmEngine} out ${output})`);
   });
 });
 
