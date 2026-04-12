@@ -70,6 +70,7 @@
           <button class="output-btn" data-output="1"></button>
           <button class="output-btn" data-output="2"></button>
           <button class="output-btn" data-output="3"></button>
+          <button class="output-btn" data-output="4"></button>
         </div>
         <div class="rhythm-select">
           <span class="rhythm-select-label">Engine</span>
@@ -116,6 +117,16 @@
     <section class="monitor-panel">
       <div class="monitor-header">
         <h2>MIDI Monitor</h2>
+        <div class="log-filters">
+          <label class="log-filter"><input type="checkbox" data-filter="noteon"  checked> Note</label>
+          <label class="log-filter"><input type="checkbox" data-filter="cc"      checked> CC</label>
+          <label class="log-filter"><input type="checkbox" data-filter="pc"      checked> PC</label>
+          <label class="log-filter"><input type="checkbox" data-filter="sysex"   checked> SysEx</label>
+          <label class="log-filter"><input type="checkbox" data-filter="other"   checked> Other</label>
+          <span class="log-filter-sep">|</span>
+          <label class="log-filter"><input type="checkbox" data-filter="in"  checked> In</label>
+          <label class="log-filter"><input type="checkbox" data-filter="out" checked> Out</label>
+        </div>
         <button id="clear-btn">Clear</button>
       </div>
       <div id="midi-log" class="midi-log">

@@ -399,9 +399,50 @@ select[disabled] {
 .monitor-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 8px;
+  flex-wrap: wrap;
 }
+
+.monitor-header h2 {
+  margin-right: auto;
+}
+
+.log-filters {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.log-filter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-dim);
+  cursor: pointer;
+  user-select: none;
+}
+
+.log-filter input {
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.log-filter-sep {
+  color: var(--border);
+  font-size: 11px;
+}
+
+.log-dir {
+  font-size: 9px;
+  width: 12px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.log-dir.in  { color: var(--green); }
+.log-dir.out { color: var(--accent); }
 
 .midi-log {
   background: var(--bg);
@@ -429,7 +470,7 @@ select[disabled] {
 
 .log-entry {
   display: grid;
-  grid-template-columns: 68px 80px 1fr;
+  grid-template-columns: 12px 68px 80px 1fr;
   gap: 8px;
   font-family: 'Consolas', 'Courier New', monospace;
   font-size: 11px;

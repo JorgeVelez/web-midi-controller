@@ -171,11 +171,32 @@ function onMidiMessage(e) {
       dataStr  = [...e.data].map(b => b.toString(16).padStart(2,'0')).join(' ');
   }
 
-  addLogEntry(typeName, cssClass, dataStr);
+  addLogEntry(typeName, cssClass, dataStr, 'in');
 }
 
+// --- Log filters ---
+const logFilters = new Set(['noteon','noteoff','cc','pc','sysex','other','in','out']);
+
+document.querySelectorAll('.log-filter input').forEach(cb => {
+  cb.addEventListener('change', () => {
+    const filter = cb.dataset.filter;
+    if (cb.checked) {
+      logFilters.add(filter);
+      if (filter === 'noteon') logFilters.add('noteoff');
+    } else {
+      logFilters.delete(filter);
+      if (filter === 'noteon') logFilters.delete('noteoff');
+    }
+    document.querySelectorAll('.log-entry').forEach(entry => {
+      const type = entry.dataset.type;
+      const dir  = entry.dataset.dir;
+      entry.style.display = (logFilters.has(type) && logFilters.has(dir)) ? '' : 'none';
+    });
+  });
+});
+
 // --- Log ---
-export function addLogEntry(typeName, cssClass, dataStr) {
+export function addLogEntry(typeName, cssClass, dataStr, dir = 'out') {
   const placeholder = logEl.querySelector('.placeholder');
   if (placeholder) placeholder.remove();
 
@@ -184,8 +205,13 @@ export function addLogEntry(typeName, cssClass, dataStr) {
                '.' + String(now.getMilliseconds()).padStart(3,'0');
 
   const entry = document.createElement('div');
-  entry.className = 'log-entry';
+  entry.className = `log-entry ${cssClass}`;
+  entry.dataset.type = cssClass;
+  entry.dataset.dir  = dir;
+  if (!logFilters.has(cssClass) || !logFilters.has(dir)) entry.style.display = 'none';
+  const dirMark = dir === 'in' ? '▼' : '▲';
   entry.innerHTML =
+    `<span class="log-dir ${dir}">${dirMark}</span>` +
     `<span class="log-time">${time}</span>` +
     `<span class="log-type ${cssClass}">${typeName}</span>` +
     `<span class="log-data">${dataStr}</span>`;
@@ -226,7 +252,7 @@ function sendMessage() {
   selectedOutput.send(msg);
   if (sendType.value === 'sysex') {
     const hex = msg.map(b => b.toString(16).padStart(2, '0')).join(' ');
-    addLogEntry('SysEx', 'sysex', hex);
+    addLogEntry('SysEx', 'sysex', hex, 'out');
   } else {
     onMidiMessage({ data: msg });
   }

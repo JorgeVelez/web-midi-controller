@@ -42,7 +42,7 @@ document.querySelectorAll('.rhythm-sel-btn').forEach(btn => {
 document.querySelectorAll('.output-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const output = parseInt(btn.dataset.output);
-    const value  = (currentRhythmEngine - 1) * 3 + (output - 1);
+    const value  = (currentRhythmEngine - 1) * 4 + (output - 1);
     if (!selectedOutput) return;
     selectedOutput.send([0xb0 | soundChannel, 31, value]);
     addLogEntry('CC', 'cc', `ch${soundChannel}  cc31  val ${value} (engine ${currentRhythmEngine} out ${output})`);
