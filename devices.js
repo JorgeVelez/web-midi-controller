@@ -121,7 +121,7 @@ function onMidiMessage(e) {
 
   if (status === 0xf0) {
     const text = [...e.data].filter(b => b >= 0x20 && b <= 0x7e).map(b => String.fromCharCode(b)).join('').replace(/^[^a-zA-Z0-9\[{(]+/, '');
-    addLogEntry('SysEx', 'sysex', text);
+    addLogEntry('SysEx', 'sysex', text, 'in');
     return;
   }
 
@@ -250,11 +250,19 @@ function sendMessage() {
   const msg = buildMessage();
   if (!msg) return;
   selectedOutput.send(msg);
+  const type  = msg[0] >> 4;
+  const ch    = (msg[0] & 0x0f) + 1;
+  const typeMap = { 0x9: ['Note On','noteon'], 0x8: ['Note Off','noteoff'], 0xb: ['CC','cc'], 0xc: ['Prog Chg','pc'], 0xe: ['Pitch Bend','other'] };
   if (sendType.value === 'sysex') {
     const hex = msg.map(b => b.toString(16).padStart(2, '0')).join(' ');
     addLogEntry('SysEx', 'sysex', hex, 'out');
   } else {
-    onMidiMessage({ data: msg });
+    const [typeName, cssClass] = typeMap[type] ?? ['MSG', 'other'];
+    const dataStr = type === 0xb ? `ch${ch}  cc${msg[1]}  val ${msg[2]}`
+                  : type === 0xc ? `ch${ch}  prog ${msg[1]}`
+                  : type === 0x9 || type === 0x8 ? `ch${ch}  ${noteName(msg[1])} (${msg[1]})  vel ${msg[2] ?? 0}`
+                  : msg.map(b => b.toString(16).padStart(2,'0')).join(' ');
+    addLogEntry(typeName, cssClass, dataStr, 'out');
   }
 }
 
